@@ -3,6 +3,7 @@
   yum: name=libselinux-python state=present
   when: ansible_os_family == "RedHat"
   tags: [packages,nginx]
+  sudo: yes
 
 - name: Copy the epel packages
   template: src=epel.repo.j2 dest=/etc/yum.repos.d/epel_ansible.repo
@@ -14,12 +15,14 @@
   with_items: nginx_redhat_pkg
   when:  nginx_is_el|bool
   tags: [packages,nginx]
+  sudo: yes
 
 - name: Install the nginx packages
   yum: name={{ item }} state=present
   with_items: nginx_redhat_pkg
   when: ansible_os_family == "RedHat" and not nginx_is_el|bool
   tags: [packages,nginx]
+  sudo: yes
 
 - name: Install the nginx packages
   apt: name={{ item }} state=present update_cache=yes
@@ -27,3 +30,4 @@
   environment: env
   when: ansible_os_family == "Debian"
   tags: [packages,nginx]
+  sudo: yes

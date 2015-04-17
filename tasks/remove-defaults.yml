@@ -4,6 +4,7 @@
   notify:
   - reload nginx
   tags: [configuration,nginx]
+  sudo: yes
 
 - name: Remove the default configuration
   file: path={{nginx_conf_dir}}/conf.d/default.conf state=absent
@@ -12,4 +13,5 @@
   notify:
   - reload nginx
   tags: [configuration,nginx]
+  sudo: yes
 

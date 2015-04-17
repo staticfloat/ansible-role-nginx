@@ -4,6 +4,7 @@
   register: enabled_sites
   changed_when: False
   tags: [configuration,nginx]
+  sudo: yes
 
 - name: Disable unmanaged sites
   file: path={{nginx_conf_dir}}/sites-enabled/{{ item }} state=absent
@@ -13,12 +14,14 @@
   notify:
    - reload nginx
   tags: [configuration,nginx]
+  sudo: yes
 
 - name: Find config files
   shell: ls -1 {{nginx_conf_dir}}/conf.d
   register: config_files
   changed_when: False
   tags: [configuration,nginx]
+  sudo: yes
 
 - name: Remove unmanaged config files
   file: name={{nginx_conf_dir}}/conf.d/{{ item }} state=absent
@@ -28,4 +31,5 @@
   notify:
    - reload nginx
   tags: [configuration,nginx]
+  sudo: yes
 
