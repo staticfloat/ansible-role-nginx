@@ -18,7 +18,8 @@ http {
         ssl_dhparam {{nginx_ssl_dir}}/dhparams.key;
         ssl_session_cache shared:SSL:10m;
         add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
-        add_header X-Frame-Options DENY;
+        # This killed ubicomplab drupal site overlays.  :(
+        #add_header X-Frame-Options DENY;
         add_header X-Content-Type-Options nosniff;
         #ssl_session_tickets off; # Requires nginx >= 1.6.0?
         ssl_stapling on; # Requires nginx >= 1.3.7
