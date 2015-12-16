@@ -27,25 +27,30 @@
   file: path={{ nginx_ssl_dir }} state=directory owner={{nginx_user}} group={{nginx_group}} mode=0750
   tags: [configuration,nginx]
 
-- name: Install SSL keys
+- name: Install manual SSL keys
   copy: src={{ item.value.key }} dest={{ nginx_ssl_dir }}/{{item.key}}.key owner={{nginx_user}} mode=0600
   with_dict: nginx_ssl_files
   tags: [configuration,nginx]
 
-- name: Install SSL certs
+- name: Install manual SSL certs
   template: src=ssl_cert_chain.j2 dest={{ nginx_ssl_dir }}/{{item}}.crt owner={{nginx_user}} mode=0640
   with_items: nginx_ssl_files.keys()
   tags: [configuration,nginx]
 
-- name: Generate Diffie-Helman parameters
-  command: openssl dhparam -out "{{ nginx_ssl_dir }}/dhparams.key" 4096 creates={{ nginx_ssl_dir }}/dhparams.key
-  when: nginx_ssl_files
-  tags: [configuration,nginx]
+- name: Stop nginx
+  service: name=nginx state=stopped
+  when: nginx_letsencrypt
 
-- name: Set permissions of Diffie-Helman parameters
-  file: path={{ nginx_ssl_dir }}/dhparams.key mode=0600 owner={{nginx_user}}
-  when: nginx_ssl_files
-  tags: [configuration,nginx]
+- name: Install Letsenctypt keys/certs
+  command: ~/src/letsencrypt/letsencrypt-auto certonly --standalone --keep-until-expiring --email "{{ nginx_letsencrypt_email }}" -d "{{ item }}"
+  notify:
+    - restart nginx
+  with_items: nginx_letsencrypt
+  when: nginx_letsencrypt
+
+- name: Get Diffie-Helman parameters
+  get_url: dest="{{ nginx_ssl_dir }}/dhparams.key" url=https://dhparams.davinci.cs.washington.edu/get/4096 mode=0600
+  when: nginx_ssl_files or nginx_letsencrypt
 
 - name: Create the configurations for sites
   template: src=site.conf.j2 dest={{nginx_conf_dir}}/sites-available/{{ item }}.conf

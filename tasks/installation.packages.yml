@@ -27,3 +27,11 @@
   environment: env
   when: ansible_os_family == "Debian"
   tags: [packages,nginx]
+
+- name: Ensure ~/src exists
+  file: path=~/src state=directory
+  when: nginx_letsencrypt
+
+- name: Clone letsencrypt
+  git: repo=https://github.com/letsencrypt/letsencrypt.git dest=~/src/letsencrypt
+  when: nginx_letsencrypt
