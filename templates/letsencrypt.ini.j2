@@ -1,0 +1,5 @@
+rsa-key-size = 4096
+email = {{ nginx_letsencrypt_email }}
+domains = {{ item }}
+authenticator = standalone
+standalone-supported-challenges = tls-sni-01
