@@ -41,11 +41,23 @@
   service: name=nginx state=stopped
   when: nginx_letsencrypt
 
-- name: Install Letsenctypt keys/certs
-  command: ~/src/letsencrypt/letsencrypt-auto certonly --standalone --keep-until-expiring --email "{{ nginx_letsencrypt_email }}" -d "{{ item }}"
-  notify:
-    - restart nginx
+- name: Build letsencrypt.ini
+  template: src=letsencrypt.ini.j2 dest=/tmp/letsencrypt_{{item}}.ini
   with_items: nginx_letsencrypt
+  when: nginx_letsencrypt
+
+- name: Install Letsencrypt keys/certs
+  command: ~/src/letsencrypt/letsencrypt-auto certonly --agree-tos --config /tmp/letsencrypt_{{item}}.ini creates=/etc/letsencrypt/live/{{item}}/privkey.pem
+  with_items: nginx_letsencrypt
+  when: nginx_letsencrypt
+
+- name: Delete letsencrypt.ini
+  file: path=/tmp/letsencrypt_{{item}}.ini state=absent
+  with_items: nginx_letsencrypt
+  when: nginx_letsencrypt
+
+- name: Restart nginx if we letsencrypted
+  service: name=nginx state=restarted
   when: nginx_letsencrypt
 
 - name: Get Diffie-Helman parameters

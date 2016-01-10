@@ -1,9 +1,10 @@
 #{{ ansible_managed }}
 server {
 {% for site in nginx_letsencrypt %}
-    {% if site in nginx_sites %}
+    {% if site == item %}
         ssl_certificate      /etc/letsencrypt/live/{{ site }}/fullchain.pem;
         ssl_certificate_key  /etc/letsencrypt/live/{{ site }}/privkey.pem;
+        ssl_protocols        TLSv1 TLSv1.1 TLSv1.2;
     {% endif %}
 {% endfor %}
 
