@@ -4,7 +4,13 @@ server {
     {% if site == item %}
         ssl_certificate      /etc/letsencrypt/live/{{ site }}/fullchain.pem;
         ssl_certificate_key  /etc/letsencrypt/live/{{ site }}/privkey.pem;
-        ssl_protocols        TLSv1 TLSv1.1 TLSv1.2;
+    {% endif %}
+{% endfor %}
+
+{% for site in nginx_ssl_files %}
+    {% if site == item %}
+        ssl_certificate      ssl/{{ site }}.crt;
+        ssl_certificate_key  ssl/{{ site }}.key;
     {% endif %}
 {% endfor %}
 

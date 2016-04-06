@@ -20,7 +20,7 @@
 
 - name: Ensure auth_basic files created
   template: src=auth_basic.j2 dest={{nginx_conf_dir}}/auth_basic/{{ item }} owner=root group={{nginx_group}} mode=0750
-  with_items: nginx_auth_basic_files.keys()
+  with_items: "{{ nginx_auth_basic_files.keys() }}"
   tags: [configuration,nginx]
 
 - name: Ensure SSL directory exists
@@ -29,12 +29,12 @@
 
 - name: Install manual SSL keys
   copy: src={{ item.value.key }} dest={{ nginx_ssl_dir }}/{{item.key}}.key owner={{nginx_user}} mode=0600
-  with_dict: nginx_ssl_files
+  with_dict: "{{ nginx_ssl_files }}"
   tags: [configuration,nginx]
 
 - name: Install manual SSL certs
   template: src=ssl_cert_chain.j2 dest={{ nginx_ssl_dir }}/{{item}}.crt owner={{nginx_user}} mode=0640
-  with_items: nginx_ssl_files.keys()
+  with_items: "{{ nginx_ssl_files.keys() }}"
   tags: [configuration,nginx]
 
 - name: Stop nginx
@@ -43,22 +43,22 @@
 
 - name: Build letsencrypt.ini
   template: src=letsencrypt.ini.j2 dest=/tmp/letsencrypt_{{item}}.ini
-  with_items: nginx_letsencrypt
-  when: nginx_letsencrypt
+  with_items: "{{ nginx_letsencrypt }}"
+  when: "{{ nginx_letsencrypt }}"
 
 - name: Install Letsencrypt keys/certs
   command: ~/src/letsencrypt/letsencrypt-auto certonly --agree-tos --config /tmp/letsencrypt_{{item}}.ini creates=/etc/letsencrypt/live/{{item}}/privkey.pem
-  with_items: nginx_letsencrypt
-  when: nginx_letsencrypt
+  with_items: "{{ nginx_letsencrypt }}"
+  when: "{{ nginx_letsencrypt }}"
 
 - name: Delete letsencrypt.ini
   file: path=/tmp/letsencrypt_{{item}}.ini state=absent
-  with_items: nginx_letsencrypt
-  when: nginx_letsencrypt
+  with_items: "{{ nginx_letsencrypt }}"
+  when: "{{ nginx_letsencrypt }}"
 
 - name: Restart nginx if we letsencrypted
   service: name=nginx state=restarted
-  when: nginx_letsencrypt
+  when: "{{ nginx_letsencrypt }}"
 
 - name: Get Diffie-Helman parameters
   get_url: dest="{{ nginx_ssl_dir }}/dhparams.key" url=https://dhparams.davinci.cs.washington.edu/get/4096 mode=0600
@@ -66,21 +66,21 @@
 
 - name: Create the configurations for sites
   template: src=site.conf.j2 dest={{nginx_conf_dir}}/sites-available/{{ item }}.conf
-  with_items: nginx_sites.keys()
+  with_items: "{{ nginx_sites.keys() }}"
   notify:
    - restart nginx
   tags: [configuration,nginx]
 
 - name: Create links for sites-enabled
   file: state=link src={{nginx_conf_dir}}/sites-available/{{ item }}.conf dest={{nginx_conf_dir}}/sites-enabled/{{ item }}.conf
-  with_items: nginx_sites.keys()
+  with_items: "{{ nginx_sites.keys() }}"
   notify:
    - reload nginx
   tags: [configuration,nginx]
 
 - name: Create the configurations for independent config file
   template: src=config.conf.j2 dest={{nginx_conf_dir}}/conf.d/{{ item }}.conf
-  with_items: nginx_configs.keys()
+  with_items: "{{ nginx_configs.keys() }}"
   notify:
    - reload nginx
   tags: [configuration,nginx]
