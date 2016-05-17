@@ -47,7 +47,7 @@
   when: "{{ nginx_letsencrypt }}"
 
 - name: Install Letsencrypt keys/certs
-  command: "{{ nginx_home }}/src/letsencrypt/letsencrypt-auto certonly --agree-tos --config /tmp/letsencrypt_{{item}}.ini creates=/etc/letsencrypt/live/{{item}}/privkey.pem"
+  command: "{{nginx_home.stdout}}/bin/certbot-auto certonly --agree-tos --config /tmp/letsencrypt_{{item}}.ini creates=/etc/letsencrypt/live/{{item}}/privkey.pem"
   with_items: "{{ nginx_letsencrypt }}"
   when: "{{ nginx_letsencrypt }}"
 

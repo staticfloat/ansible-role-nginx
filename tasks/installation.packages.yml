@@ -38,10 +38,10 @@
   register: nginx_home
   when: "{{ nginx_letsencrypt }}"
 
-- name: Ensure ~/src exists
-  file: path={{nginx_home.stdout}}/src state=directory
+- name: Ensure ~/bin exists
+  file: path={{nginx_home.stdout}}/bin state=directory
   when: "{{ nginx_letsencrypt }}"
 
-- name: Clone letsencrypt
-  git: repo=https://github.com/letsencrypt/letsencrypt.git dest={{ nginx_home }}/src/letsencrypt
+- name: Download certbot-auto
+  get_url: url=https://dl.eff.org/certbot-auto dest={{nginx_home.stdout}}/bin/certbot-auto
   when: "{{ nginx_letsencrypt }}"
