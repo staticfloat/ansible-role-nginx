@@ -43,5 +43,5 @@
   when: "{{ nginx_letsencrypt }}"
 
 - name: Download certbot-auto
-  get_url: url=https://dl.eff.org/certbot-auto dest={{nginx_home.stdout}}/bin/certbot-auto
+  get_url: url=https://dl.eff.org/certbot-auto dest={{nginx_home.stdout}}/bin/certbot-auto mode=0755
   when: "{{ nginx_letsencrypt }}"
